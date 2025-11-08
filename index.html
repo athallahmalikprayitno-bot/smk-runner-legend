@@ -253,9 +253,11 @@
   </div>
 
   <div id="overlay">
-    <h1>GAME OVER</h1>
-    <p>Tekan ENTER untuk mulai lagi<br>atau tekan P untuk kembali ke menu</p>
-  </div>
+  <h1>GAME OVER</h1>
+  <p>Tekan ENTER untuk mulai lagi<br>atau tekan tombol di bawah untuk kembali ke menu</p>
+  <button id="restartBtn">Mulai Lagi</button>
+  <button id="backToMenuBtn">Kembali ke Menu</button>
+</div>
 
   <script>
   const canvas = document.getElementById("gameCanvas");
@@ -504,30 +506,9 @@
     });
   }
 
-  function showGameOverScreen() {
-    overlay.innerHTML = `
-      <h1>GAME OVER</h1>
-      <p>Ketuk layar untuk mulai lagi<br>atau tekan tombol di bawah untuk kembali ke menu</p>
-      <button id="backToMenuBtn" style="
-        margin-top: 20px;
-        padding: 10px 25px;
-        background: #27ae60;
-        border: none;
-        border-radius: 30px;
-        color: white;
-        font-size: 20px;
-        cursor: pointer;
-      ">Kembali ke Menu</button>
-    `;
-    overlay.style.display = "flex";
-
-    document.getElementById("backToMenuBtn").onclick = () => {
-      overlay.style.display = "none";
-      mainMenu.style.display = "flex";
-      canvas.style.display = "none";
-      stopBGM();
-    };
-  }
+ function showGameOverScreen() {
+  overlay.style.display = "flex"; // tampilkan overlay
+}
 
   function animate() {
     if (gameOver) return;
@@ -538,5 +519,22 @@
     drawScore();
     requestAnimationFrame(animate);
   }
+
+  // -----------------------------
+  // Pasang event listener tombol
+  const restartBtn = document.getElementById("restartBtn");
+  const backToMenuBtn = document.getElementById("backToMenuBtn");
+
+  restartBtn.onclick = () => {
+    overlay.style.display = "none"; // sembunyikan overlay
+    startGame(); // mulai game lagi
+  };
+
+  backToMenuBtn.onclick = () => {
+    overlay.style.display = "none"; // sembunyikan overlay
+    mainMenu.style.display = "flex"; // tampilkan menu utama
+    canvas.style.display = "none"; // sembunyikan canvas
+    stopBGM(); // hentikan musik
+  };
 </script>
 
