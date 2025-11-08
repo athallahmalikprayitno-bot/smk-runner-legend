@@ -15,10 +15,11 @@
       font-family: 'Poppins', sans-serif;
     }
     canvas {
-      background: url('assets/image/BG.png') no-repeat center/cover;
-      border: 3px solid #000;
-      display: none;
-    }
+  width: 100vw;
+  height: 100vh;
+  touch-action: none; /* biar tap gak geser layar */
+  background-size: cover;
+}
 
     /* Loading Screen */
     #loadingScreen {
@@ -255,6 +256,19 @@
   </div>
 
   <script>
+   document.addEventListener("DOMContentLoaded", () => {
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  // semua kode game lo masuk sini juga
+});
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
   const mainMenu = document.getElementById("mainMenu");
