@@ -15,11 +15,10 @@
       font-family: 'Poppins', sans-serif;
     }
     canvas {
-  width: 100vw;
-  height: 100vh;
-  touch-action: none; /* biar tap gak geser layar */
-  background-size: cover;
-}
+      background: url('assets/image/BG.png') no-repeat center/cover;
+      border: 3px solid #000;
+      display: none;
+    }
 
     /* Loading Screen */
     #loadingScreen {
@@ -255,7 +254,7 @@
     <p>Tekan ENTER untuk mulai lagi<br>atau tekan P untuk kembali ke menu</p>
   </div>
 
- <script>
+  <script>
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
   const mainMenu = document.getElementById("mainMenu");
