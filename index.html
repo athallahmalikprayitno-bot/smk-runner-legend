@@ -14,14 +14,14 @@
       align-items: center;
       font-family: 'Poppins', sans-serif;
     }
-    canvas {
-      ackground-image: url('assets/image/BG.png');
+   canvas {
+  background-image: url('assets/image/BG.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
   border: 3px solid #000;
-  display: none;
-    }
+  display: none; /* tetap bisa di-toggle via JS */
+}
 
     /* Loading Screen */
     #loadingScreen {
@@ -531,5 +531,6 @@
     requestAnimationFrame(animate);
   }
 </script>
+
 
 
