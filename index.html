@@ -504,12 +504,23 @@
         }
       }
     });
-  }
-
  function showGameOverScreen() {
-  overlay.style.display = "flex"; // tampilkan overlay
-}
-
+    overlay.innerHTML = `
+      <h1>GAME OVER</h1>
+      <p>Ketuk layar untuk mulai lagi<br>atau tekan tombol di bawah untuk kembali ke menu</p>
+      <button id="backToMenuBtn" style="
+        margin-top: 20px;
+        padding: 10px 25px;
+        background: #27ae60;
+        border: none;
+        border-radius: 30px;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+      ">Kembali ke Menu</button>
+    `;
+    overlay.style.display = "flex";
+  
   function animate() {
     if (gameOver) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -519,22 +530,6 @@
     drawScore();
     requestAnimationFrame(animate);
   }
-
-  // -----------------------------
-  // Pasang event listener tombol
-  const restartBtn = document.getElementById("restartBtn");
-  const backToMenuBtn = document.getElementById("backToMenuBtn");
-
-  restartBtn.onclick = () => {
-    overlay.style.display = "none"; // sembunyikan overlay
-    startGame(); // mulai game lagi
-  };
-
-  backToMenuBtn.onclick = () => {
-    overlay.style.display = "none"; // sembunyikan overlay
-    mainMenu.style.display = "flex"; // tampilkan menu utama
-    canvas.style.display = "none"; // sembunyikan canvas
-    stopBGM(); // hentikan musik
-  };
 </script>
+
 
