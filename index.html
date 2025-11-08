@@ -339,7 +339,7 @@
     difficulty = difficultySelect.value;
     let baseSpeed = 6;
     let obstacleCount = 1;
-    let obstacleSpawnRate = 300; // default jarak antar obstacle
+    let obstacleSpawnRate = 300;
 
     if (difficulty === "easy") {
       baseSpeed = 5;
@@ -353,12 +353,12 @@
       baseSpeed = 8;
       obstacleCount = 2;
       obstacleSpawnRate = 200;
-      playerMaxJump = 2; // double jump aktif
+      playerMaxJump = 2;
     } else if (difficulty === "veryhard") {
       baseSpeed = 10;
       obstacleCount = 3;
       obstacleSpawnRate = 150;
-      playerMaxJump = 2; // double jump aktif
+      playerMaxJump = 2;
     }
 
     player = { 
@@ -390,23 +390,29 @@
     gameOver = false;
   }
 
+  // 🎮 Kontrol Keyboard & Sentuhan
   document.addEventListener("keydown", (e) => {
-    if (e.code === "Space" && !gameOver) {
-      if (player.grounded || player.jumpCount < player.maxJumps) {
-        player.vy = player.jumpPower;
-        player.grounded = false;
-        player.jumpCount++;
-        if (isSoundOn()) jumpSound.play();
-      }
-    }
+    if (e.code === "Space" && !gameOver) jumpAction();
     if (gameOver && e.code === "Enter") startGame();
-    if (gameOver && e.code === "KeyP") {
-      overlay.style.display = "none";
-      mainMenu.style.display = "flex";
-      canvas.style.display = "none";
-      stopBGM();
+  });
+
+  // 🎮 Kontrol Tap di layar (buat Android)
+  canvas.addEventListener("touchstart", () => {
+    if (!gameOver) {
+      jumpAction();
+    } else {
+      startGame();
     }
   });
+
+  function jumpAction() {
+    if (player.grounded || player.jumpCount < player.maxJumps) {
+      player.vy = player.jumpPower;
+      player.grounded = false;
+      player.jumpCount++;
+      if (isSoundOn()) jumpSound.play();
+    }
+  }
 
   function startGame() {
     mainMenu.style.display = "none";
@@ -415,7 +421,6 @@
     initGame();
     if (isSoundOn()) playBGM();
 
-    // Double Jump Info
     if(difficulty === "hard" || difficulty === "veryhard"){
       const tip = document.createElement("div");
       tip.innerText = "💡 Double Jump Aktif!";
@@ -472,7 +477,7 @@
     obstacles.forEach(obs => {
       obs.x -= obs.speed;
       if (obs.x + obs.width < 0) {
-        obs.x = 800 + Math.random() * 250; // makin kecil, makin cepat muncul
+        obs.x = 800 + Math.random() * 250;
         score++;
         if (score % 100 === 0) obs.speed += 1;
       }
@@ -486,7 +491,7 @@
         hitboxPlayer.bottom > hitboxObstacle.top + 10
       ) {
         gameOver = true;
-        overlay.style.display = "flex";
+        showGameOverScreen();
         if (isSoundOn()) { stopBGM(); gameOverSound.play(); }
         if (score > highScore) {
           highScore = score;
@@ -494,6 +499,31 @@
         }
       }
     });
+  }
+
+  function showGameOverScreen() {
+    overlay.innerHTML = `
+      <h1>GAME OVER</h1>
+      <p>Ketuk layar untuk mulai lagi<br>atau tekan tombol di bawah untuk kembali ke menu</p>
+      <button id="backToMenuBtn" style="
+        margin-top: 20px;
+        padding: 10px 25px;
+        background: #27ae60;
+        border: none;
+        border-radius: 30px;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+      ">Kembali ke Menu</button>
+    `;
+    overlay.style.display = "flex";
+
+    document.getElementById("backToMenuBtn").onclick = () => {
+      overlay.style.display = "none";
+      mainMenu.style.display = "flex";
+      canvas.style.display = "none";
+      stopBGM();
+    };
   }
 
   function animate() {
