@@ -260,279 +260,273 @@
   <button id="backToMenuBtn">Kembali ke Menu</button>
 </div>
 
-  <script>
-  const canvas = document.getElementById("gameCanvas");
-  const ctx = canvas.getContext("2d");
-  const mainMenu = document.getElementById("mainMenu");
-  const loadingScreen = document.getElementById("loadingScreen");
-  const optionScreen = document.getElementById("optionScreen");
-  const overlay = document.getElementById("overlay");
-  const highScoreDisplay = document.getElementById("highScore");
-  const difficultySelect = document.getElementById("difficulty");
-  const soundOption = document.getElementById("soundOption");
-  const bgmSelect = document.getElementById("bgmSelect");
+ <script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const mainMenu = document.getElementById("mainMenu");
+const loadingScreen = document.getElementById("loadingScreen");
+const optionScreen = document.getElementById("optionScreen");
+const overlay = document.getElementById("overlay");
+const highScoreDisplay = document.getElementById("highScore");
+const difficultySelect = document.getElementById("difficulty");
+const soundOption = document.getElementById("soundOption");
+const bgmSelect = document.getElementById("bgmSelect");
 
-  let highScore = localStorage.getItem("highScore") || 0;
-  highScoreDisplay.innerText = "High Score: " + highScore;
+let highScore = localStorage.getItem("highScore") || 0;
+highScoreDisplay.innerText = "High Score: " + highScore;
 
-  let bgm = new Audio();
-  let jumpSound = new Audio("assets/audio/jump .mp3");
-  let gameOverSound = new Audio("assets/audio/game over.mp3");
-  bgm.loop = true;
-  bgm.volume = 0.5;
-  jumpSound.volume = 0.2;
-  gameOverSound.volume = 0.6;
+let bgm = new Audio();
+let jumpSound = new Audio("assets/audio/jump .mp3");
+let gameOverSound = new Audio("assets/audio/game over.mp3");
+bgm.loop = true;
+bgm.volume = 0.5;
+jumpSound.volume = 0.2;
+gameOverSound.volume = 0.6;
 
-  function playBGM() {
-    if (!isSoundOn()) return;
-    bgm.src = bgmSelect.value;
-    bgm.play().catch(() => {});
+function isSoundOn() {
+  return soundOption.value === "on";
+}
+
+function playBGM() {
+  if (!isSoundOn()) return;
+  bgm.src = bgmSelect.value;
+  bgm.play().catch(() => {});
+}
+
+function stopBGM() {
+  bgm.pause();
+  bgm.currentTime = 0;
+}
+
+// Loading screen
+setTimeout(() => {
+  loadingScreen.style.display = "none";
+  mainMenu.style.display = "flex";
+}, 3000);
+
+// Tombol Menu
+document.getElementById("playBtn").addEventListener("click", startGame);
+document.getElementById("optionBtn").addEventListener("click", () => {
+  mainMenu.style.display = "none";
+  optionScreen.style.display = "flex";
+});
+document.getElementById("backBtn").addEventListener("click", () => {
+  optionScreen.style.display = "none";
+  mainMenu.style.display = "flex";
+});
+
+// Update BGM saat berubah
+bgmSelect.addEventListener("change", () => {
+  if (!gameOver && isSoundOn()) {
+    stopBGM();
+    playBGM();
   }
+});
 
-  function stopBGM() {
-    bgm.pause();
-    bgm.currentTime = 0;
-  }
+// Images
+const images = {
+  run1: new Image(),
+  run2: new Image(),
+  run3: new Image(),
+  jump1: new Image(),
+  jump2: new Image(),
+  jump3: new Image(),
+  obstacle: new Image()
+};
+images.run1.src = "assets/image/SMK_RUN_1.png";
+images.run2.src = "assets/image/SMK_RUN_2.png";
+images.run3.src = "assets/image/SMK_RUN_3.png";
+images.jump1.src = "assets/image/SMK_JUMP_1.png";
+images.jump2.src = "assets/image/SMK_JUMP_2.png";
+images.jump3.src = "assets/image/SMK_JUMP_3.png";
+images.obstacle.src = "assets/image/tongsampah.png";
 
-  function isSoundOn() {
-    return soundOption.value === "on";
-  }
+// Game variables
+let player, obstacles = [], frame, score, gameOver, difficulty;
 
-  setTimeout(() => {
-    loadingScreen.style.display = "none";
-    mainMenu.style.display = "flex";
-  }, 3000);
+function initGame() {
+  difficulty = difficultySelect.value;
+  let baseSpeed = 6;
+  let obstacleCount = 1;
+  let obstacleSpawnRate = 300;
+  let playerMaxJump = 1;
 
-  document.getElementById("optionBtn").onclick = () => {
-    mainMenu.style.display = "none";
-    optionScreen.style.display = "flex";
+  if (difficulty === "easy") { baseSpeed = 5; obstacleCount = 1; playerMaxJump = 1; }
+  else if (difficulty === "normal") { baseSpeed = 6; obstacleCount = 1; playerMaxJump = 1; }
+  else if (difficulty === "hard") { baseSpeed = 8; obstacleCount = 2; obstacleSpawnRate = 200; playerMaxJump = 2; }
+  else if (difficulty === "veryhard") { baseSpeed = 10; obstacleCount = 3; obstacleSpawnRate = 150; playerMaxJump = 2; }
+
+  player = { 
+    x: 100, y: 300, width: 90, height: 90, vy: 0, gravity: 0.8, jumpPower: -12,
+    grounded: true, jumpCount: 0, maxJumps: playerMaxJump
   };
 
-  document.getElementById("backBtn").onclick = () => {
-    optionScreen.style.display = "none";
-    mainMenu.style.display = "flex";
-  };
-
-  document.getElementById("playBtn").onclick = startGame;
-
-  bgmSelect.addEventListener("change", () => {
-    if (!gameOver && isSoundOn()) {
-      stopBGM();
-      playBGM();
-    }
-  });
-
-  const images = {
-    run1: new Image(),
-    run2: new Image(),
-    run3: new Image(),
-    jump1: new Image(),
-    jump2: new Image(),
-    jump3: new Image(),
-    obstacle: new Image()
-  };
-  images.run1.src = "assets/image/SMK_RUN_1.png";
-  images.run2.src = "assets/image/SMK_RUN_2.png";
-  images.run3.src = "assets/image/SMK_RUN_3.png";
-  images.jump1.src = "assets/image/SMK_JUMP_1.png";
-  images.jump2.src = "assets/image/SMK_JUMP_2.png";
-  images.jump3.src = "assets/image/SMK_JUMP_3.png";
-  images.obstacle.src = "assets/image/tongsampah.png";
-
-  let player, obstacles = [], frame, score, gameOver, difficulty;
-
-  function initGame() {
-    difficulty = difficultySelect.value;
-    let baseSpeed = 6;
-    let obstacleCount = 1;
-    let obstacleSpawnRate = 300;
-
-    if (difficulty === "easy") {
-      baseSpeed = 5;
-      obstacleCount = 1;
-      playerMaxJump = 1;
-    } else if (difficulty === "normal") {
-      baseSpeed = 6;
-      obstacleCount = 1;
-      playerMaxJump = 1;
-    } else if (difficulty === "hard") {
-      baseSpeed = 8;
-      obstacleCount = 2;
-      obstacleSpawnRate = 200;
-      playerMaxJump = 2;
-    } else if (difficulty === "veryhard") {
-      baseSpeed = 10;
-      obstacleCount = 3;
-      obstacleSpawnRate = 150;
-      playerMaxJump = 2;
-    }
-
-    player = { 
-      x: 100, 
-      y: 300, 
-      width: 90, 
-      height: 90, 
-      vy: 0, 
-      gravity: 0.8, 
-      jumpPower: -12, 
-      grounded: true, 
-      jumpCount: 0, 
-      maxJumps: playerMaxJump 
-    };
-
-    obstacles = [];
-    for (let i = 0; i < obstacleCount; i++) {
-      obstacles.push({ 
-        x: 800 + i * obstacleSpawnRate, 
-        y: 330, 
-        width: 75, 
-        height: 80, 
-        speed: baseSpeed 
-      });
-    }
-
-    frame = 0; 
-    score = 0; 
-    gameOver = false;
+  obstacles = [];
+  for (let i = 0; i < obstacleCount; i++) {
+    obstacles.push({ 
+      x: 800 + i * obstacleSpawnRate, y: 330, width: 75, height: 80, speed: baseSpeed 
+    });
   }
 
-  // 🎮 Kontrol Keyboard & Sentuhan
-  document.addEventListener("keydown", (e) => {
-    if (e.code === "Space" && !gameOver) jumpAction();
-    if (gameOver && e.code === "Enter") startGame();
-  });
+  frame = 0;
+  score = 0;
+  gameOver = false;
+}
 
-  // 🎮 Kontrol Tap di layar (buat Android)
-  canvas.addEventListener("touchstart", () => {
-    if (!gameOver) {
-      jumpAction();
-    } else {
-      startGame();
-    }
-  });
+// Kontrol Keyboard
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space" && !gameOver) jumpAction();
+  if (gameOver && e.code === "Enter") startGame();
+});
 
-  function jumpAction() {
-    if (player.grounded || player.jumpCount < player.maxJumps) {
-      player.vy = player.jumpPower;
-      player.grounded = false;
-      player.jumpCount++;
-      if (isSoundOn()) jumpSound.play();
-    }
+// Kontrol Layar (touch)
+canvas.addEventListener("touchstart", () => {
+  if (!gameOver) jumpAction();
+  else startGame();
+});
+
+function jumpAction() {
+  if (player.grounded || player.jumpCount < player.maxJumps) {
+    player.vy = player.jumpPower;
+    player.grounded = false;
+    player.jumpCount++;
+    if (isSoundOn()) jumpSound.play();
+  }
+}
+
+// Start game
+function startGame() {
+  mainMenu.style.display = "none";
+  canvas.style.display = "block";
+  overlay.style.display = "none";
+  initGame();
+  if (isSoundOn()) playBGM();
+
+  if(difficulty === "hard" || difficulty === "veryhard"){
+    const tip = document.createElement("div");
+    tip.innerText = "💡 Double Jump Aktif!";
+    tip.style.position = "absolute";
+    tip.style.top = "50px";
+    tip.style.left = "50%";
+    tip.style.transform = "translateX(-50%)";
+    tip.style.background = "rgba(0,0,0,0.7)";
+    tip.style.color = "white";
+    tip.style.padding = "10px 20px";
+    tip.style.borderRadius = "10px";
+    tip.style.zIndex = "20";
+    tip.style.opacity = "1";
+    tip.style.transition = "opacity 1s ease-out, top 1s ease-out";
+    document.body.appendChild(tip);
+    setTimeout(() => { tip.style.opacity = "0"; tip.style.top = "20px"; }, 2000);
+    setTimeout(() => { tip.remove(); }, 3000);
   }
 
-  function startGame() {
-    mainMenu.style.display = "none";
-    canvas.style.display = "block";
+  animate();
+}
+
+// Draw player
+function drawPlayer() {
+  let sprite = player.grounded 
+    ? [images.run1, images.run2, images.run3][Math.floor(frame/10)%3]
+    : [images.jump1, images.jump2, images.jump3][Math.floor(frame/10)%3];
+  ctx.drawImage(sprite, player.x, player.y, player.width, player.height);
+}
+
+// Draw obstacles
+function drawObstacles() {
+  obstacles.forEach(obs => {
+    ctx.drawImage(images.obstacle, obs.x, obs.y, obs.width, obs.height);
+  });
+}
+
+// Draw score
+function drawScore() {
+  ctx.fillStyle = "black";
+  ctx.font = "20px Arial";
+  ctx.fillText("Score: " + score, 10, 30);
+  ctx.fillText("High Score: " + highScore, 10, 55);
+}
+
+// Update game
+function update() {
+  frame++;
+  player.y += player.vy;
+  player.vy += player.gravity;
+
+  if (player.y > 300) {
+    player.y = 300;
+    player.vy = 0;
+    player.grounded = true;
+    player.jumpCount = 0;
+  }
+
+  obstacles.forEach(obs => {
+    obs.x -= obs.speed;
+    if (obs.x + obs.width < 0) {
+      obs.x = 800 + Math.random()*250;
+      score++;
+      if(score%100===0) obs.speed+=1;
+    }
+
+    const hitboxPlayer = { left: player.x+25, right: player.x+player.width-25, top: player.y+25, bottom: player.y+player.height-5 };
+    const hitboxObstacle = { left: obs.x+10, right: obs.x+obs.width-10, top: obs.y+10, bottom: obs.y+obs.height };
+
+    if(hitboxPlayer.right>hitboxObstacle.left && hitboxPlayer.left<hitboxObstacle.right && hitboxPlayer.bottom>hitboxObstacle.top+10){
+      gameOver = true;
+      showGameOverScreen();
+      if(isSoundOn()){ stopBGM(); gameOverSound.play(); }
+      if(score>highScore){ highScore=score; localStorage.setItem("highScore", highScore); }
+    }
+  });
+}
+
+// Game Over overlay
+function showGameOverScreen() {
+  overlay.innerHTML = `
+    <h1>GAME OVER</h1>
+    <p>Ketuk layar untuk mulai lagi<br>atau tekan tombol di bawah untuk kembali ke menu</p>
+    <button id="restartBtn" style="
+      margin-top: 20px;
+      padding: 10px 25px;
+      background: #27ae60;
+      border: none;
+      border-radius: 30px;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    ">Mulai Lagi</button>
+    <button id="backToMenuBtn" style="
+      margin-top: 10px;
+      padding: 10px 25px;
+      background: #27ae60;
+      border: none;
+      border-radius: 30px;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    ">Kembali ke Menu</button>
+  `;
+  overlay.style.display = "flex";
+
+  // Tombol overlay
+  document.getElementById("restartBtn").addEventListener("click", () => {
     overlay.style.display = "none";
-    initGame();
-    if (isSoundOn()) playBGM();
+    startGame();
+  });
+  document.getElementById("backToMenuBtn").addEventListener("click", () => {
+    overlay.style.display = "none";
+    mainMenu.style.display = "flex";
+  });
+}
 
-    if(difficulty === "hard" || difficulty === "veryhard"){
-      const tip = document.createElement("div");
-      tip.innerText = "💡 Double Jump Aktif!";
-      tip.style.position = "absolute";
-      tip.style.top = "50px";
-      tip.style.left = "50%";
-      tip.style.transform = "translateX(-50%)";
-      tip.style.background = "rgba(0,0,0,0.7)";
-      tip.style.color = "white";
-      tip.style.padding = "10px 20px";
-      tip.style.borderRadius = "10px";
-      tip.style.zIndex = "20";
-      tip.style.opacity = "1";
-      tip.style.transition = "opacity 1s ease-out, top 1s ease-out";
-      document.body.appendChild(tip);
-      setTimeout(() => { tip.style.opacity = "0"; tip.style.top = "20px"; }, 2000);
-      setTimeout(() => { tip.remove(); }, 3000);
-    }
-
-    animate();
-  }
-
-  function drawPlayer() {
-    let sprite = player.grounded ? [images.run1, images.run2, images.run3][Math.floor(frame / 10) % 3]
-    : [images.jump1, images.jump2, images.jump3][Math.floor(frame / 10) % 3];
-    ctx.drawImage(sprite, player.x, player.y, player.width, player.height);
-  }
-
-  function drawObstacles() {
-    obstacles.forEach(obs => {
-      ctx.drawImage(images.obstacle, obs.x, obs.y, obs.width, obs.height);
-    });
-  }
-
-  function drawScore() {
-    ctx.fillStyle = "black";
-    ctx.font = "20px Arial";
-    ctx.fillText("Score: " + score, 10, 30);
-    ctx.fillText("High Score: " + highScore, 10, 55);
-  }
-
-  function update() {
-    frame++;
-    player.y += player.vy;
-    player.vy += player.gravity;
-
-    if (player.y > 300) {
-      player.y = 300;
-      player.vy = 0;
-      player.grounded = true;
-      player.jumpCount = 0;
-    }
-
-    obstacles.forEach(obs => {
-      obs.x -= obs.speed;
-      if (obs.x + obs.width < 0) {
-        obs.x = 800 + Math.random() * 250;
-        score++;
-        if (score % 100 === 0) obs.speed += 1;
-      }
-
-      const hitboxPlayer = { left: player.x + 25, right: player.x + player.width - 25, top: player.y + 25, bottom: player.y + player.height - 5 };
-      const hitboxObstacle = { left: obs.x + 10, right: obs.x + obs.width - 10, top: obs.y + 10, bottom: obs.y + obs.height };
-
-      if (
-        hitboxPlayer.right > hitboxObstacle.left &&
-        hitboxPlayer.left < hitboxObstacle.right &&
-        hitboxPlayer.bottom > hitboxObstacle.top + 10
-      ) {
-        gameOver = true;
-        showGameOverScreen();
-        if (isSoundOn()) { stopBGM(); gameOverSound.play(); }
-        if (score > highScore) {
-          highScore = score;
-          localStorage.setItem("highScore", highScore);
-        }
-      }
-    });
- function showGameOverScreen() {
-    overlay.innerHTML = `
-      <h1>GAME OVER</h1>
-      <p>Ketuk layar untuk mulai lagi<br>atau tekan tombol di bawah untuk kembali ke menu</p>
-      <button id="backToMenuBtn" style="
-        margin-top: 20px;
-        padding: 10px 25px;
-        background: #27ae60;
-        border: none;
-        border-radius: 30px;
-        color: white;
-        font-size: 20px;
-        cursor: pointer;
-      ">Kembali ke Menu</button>
-    `;
-    overlay.style.display = "flex";
-  
-  function animate() {
-    if (gameOver) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    update();
-    drawPlayer();
-    drawObstacles();
-    drawScore();
-    requestAnimationFrame(animate);
-  }
+// Animate
+function animate() {
+  if(gameOver) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  update();
+  drawPlayer();
+  drawObstacles();
+  drawScore();
+  requestAnimationFrame(animate);
+}
 </script>
-
-
-
-
