@@ -255,20 +255,7 @@
     <p>Tekan ENTER untuk mulai lagi<br>atau tekan P untuk kembali ke menu</p>
   </div>
 
-  <script>
-   document.addEventListener("DOMContentLoaded", () => {
-  const canvas = document.getElementById("gameCanvas");
-  const ctx = canvas.getContext("2d");
-
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener("resize", resizeCanvas);
-  resizeCanvas();
-
-  // semua kode game lo masuk sini juga
-});
+ <script>
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
   const mainMenu = document.getElementById("mainMenu");
@@ -496,12 +483,9 @@
         if (score % 100 === 0) obs.speed += 1;
       }
 
-      const hitboxObstacle = { 
-  left: obs.x + 20,          // sisi kiri dikurangin lagi
-  right: obs.x + obs.width - 20, // sisi kanan dikurangin
-  top: obs.y + 20,           // bagian atas lebih tinggi (biar gak terlalu sensitif)
-  bottom: obs.y + obs.height - 5 // bawah dikit aja biar masih kena bagian dasar
-};
+      const hitboxPlayer = { left: player.x + 25, right: player.x + player.width - 25, top: player.y + 25, bottom: player.y + player.height - 5 };
+      const hitboxObstacle = { left: obs.x + 10, right: obs.x + obs.width - 10, top: obs.y + 10, bottom: obs.y + obs.height };
+
       if (
         hitboxPlayer.right > hitboxObstacle.left &&
         hitboxPlayer.left < hitboxObstacle.right &&
