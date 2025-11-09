@@ -337,8 +337,15 @@ function jumpAction(){
 }
 
 function startGame(){
-  mainMenu.style.display="none"; canvas.style.display="block"; overlay.style.display="none";
-  initGame(); if(isSoundOn()) playBGM();
+  // 🆕 pastikan animasi lama berhenti dulu biar gak dobel
+  if (animationId) cancelAnimationFrame(animationId);
+  animationId = null;
+
+  mainMenu.style.display="none"; 
+  canvas.style.display="block"; 
+  overlay.style.display="none";
+  initGame(); 
+  if(isSoundOn()) playBGM();
 
   if(difficulty==="hard"||difficulty==="veryhard"){
     const tip=document.createElement("div");
@@ -416,3 +423,4 @@ function animate(){
 </script>
 </body>
 </html>
+
