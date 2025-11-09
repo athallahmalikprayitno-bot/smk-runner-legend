@@ -13,6 +13,7 @@ body {
   justify-content: center;
   align-items: center;
   font-family: 'Poppins', sans-serif;
+  overflow: hidden;
 }
 canvas {
   background-image: url('assets/image/BG.png');
@@ -22,9 +23,10 @@ canvas {
   border: 3px solid #000;
   display: none;
 }
+
 /* Loading Screen */
 #loadingScreen {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: black;
   color: white;
@@ -33,10 +35,12 @@ canvas {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  z-index: 9999;
 }
+
 /* Main Menu */
 #mainMenu {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: linear-gradient(180deg, #2c3e50, #3498db);
   display: flex;
@@ -45,7 +49,9 @@ canvas {
   justify-content: center;
   color: white;
   text-align: center;
+  z-index: 1000; /* 🆕 supaya tombol bisa diklik */
 }
+
 /* 🔥 LOGO STYLE */
 #gameLogo {
   width: 200px;
@@ -92,9 +98,10 @@ canvas {
   margin-top: 25px;
   color: #f1f1f1;
 }
+
 /* Option Screen */
 #optionScreen {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.9);
   color: white;
@@ -104,6 +111,7 @@ canvas {
   justify-content: center;
   text-align: left;
   padding: 20px;
+  z-index: 2000;
 }
 #optionScreen h2 {
   font-size: 36px;
@@ -153,9 +161,10 @@ canvas {
   cursor: pointer;
   font-size: 20px;
 }
+
 /* Overlay */
 #overlay {
-  position: absolute;
+  position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
   display: flex; justify-content: center; align-items: center;
@@ -163,7 +172,7 @@ canvas {
   font-family: Arial, sans-serif;
   font-size: 40px; color: red;
   text-shadow: 2px 2px 4px #000;
-  z-index: 20;
+  z-index: 3000;
   display: none;
 }
 #overlay p {
@@ -229,17 +238,6 @@ canvas {
       <option value="assets/audio/Bapak Mulyono Raja Tipu Tipu.mp3">Bapak Mulyono Raja Tipu Tipu</option>
     </select>
   </div>
-  <div class="option-item">
-    <label>📖 Cara Bermain:</label>
-    <p style="font-size: 15px; color:white; text-align:left;">
-      - SPACE untuk melompat.<br>
-      - Double Jump hanya aktif di Hard & Very Hard.<br>
-      - Hindari tong sampah.<br>
-      - Kumpulkan skor setinggi mungkin.<br>
-      - Game Over jika terkena rintangan.<br>
-      - ENTER untuk restart, P untuk kembali ke menu.
-    </p>
-  </div>
   <button id="backBtn">Kembali</button>
 </div>
 
@@ -282,13 +280,11 @@ document.getElementById("optionBtn").onclick=()=>{ mainMenu.style.display="none"
 document.getElementById("backBtn").onclick=()=>{ optionScreen.style.display="none"; mainMenu.style.display="flex"; };
 document.getElementById("playBtn").onclick=startGame;
 
-bgmSelect.addEventListener("change",()=>{
-  if(!gameOver && isSoundOn()){ stopBGM(); playBGM(); }
-});
+bgmSelect.addEventListener("change",()=>{ if(!gameOver && isSoundOn()){ stopBGM(); playBGM(); } });
 
-const images = {
-  run1:new Image(), run2:new Image(), run3:new Image(),
-  jump1:new Image(), jump2:new Image(), jump3:new Image(),
+const images={
+  run1:new Image(),run2:new Image(),run3:new Image(),
+  jump1:new Image(),jump2:new Image(),jump3:new Image(),
   obstacle:new Image()
 };
 images.run1.src="assets/image/SMK_RUN_1.png";
@@ -300,6 +296,7 @@ images.jump3.src="assets/image/SMK_JUMP_3.png";
 images.obstacle.src="assets/image/tongsampah.png";
 
 let player, obstacles=[], frame, score, gameOver=false, difficulty;
+let animationId=null; // 🆕 buat nyimpen ID animasi aktif
 
 function initGame(){
   difficulty = difficultySelect.value;
@@ -323,11 +320,7 @@ document.addEventListener("keydown",(e)=>{
   if(e.code==="Space" && !gameOver) jumpAction();
   if(gameOver && e.code==="Enter") startGame();
 });
-
-canvas.addEventListener("touchstart",()=>{
-  if(!gameOver) jumpAction();
-  else startGame();
-});
+canvas.addEventListener("touchstart",()=>{ if(!gameOver) jumpAction(); else startGame(); });
 
 function jumpAction(){
   if(player.grounded || player.jumpCount<player.maxJumps){
@@ -337,15 +330,12 @@ function jumpAction(){
 }
 
 function startGame(){
-  // 🆕 pastikan animasi lama berhenti dulu biar gak dobel
-  if (animationId) cancelAnimationFrame(animationId);
-  animationId = null;
+  // 🆕 stop animasi lama dulu biar gak dobel
+  if(animationId) cancelAnimationFrame(animationId);
+  animationId=null;
 
-  mainMenu.style.display="none"; 
-  canvas.style.display="block"; 
-  overlay.style.display="none";
-  initGame(); 
-  if(isSoundOn()) playBGM();
+  mainMenu.style.display="none"; canvas.style.display="block"; overlay.style.display="none";
+  initGame(); if(isSoundOn()) playBGM();
 
   if(difficulty==="hard"||difficulty==="veryhard"){
     const tip=document.createElement("div");
@@ -368,20 +358,12 @@ function drawPlayer(){
   let sprite = player.grounded?[images.run1,images.run2,images.run3][Math.floor(frame/10)%3]:[images.jump1,images.jump2,images.jump3][Math.floor(frame/10)%3];
   ctx.drawImage(sprite,player.x,player.y,player.width,player.height);
 }
-
 function drawObstacles(){ obstacles.forEach(obs=>{ ctx.drawImage(images.obstacle,obs.x,obs.y,obs.width,obs.height); }); }
-
-function drawScore(){
-  ctx.fillStyle="black";
-  ctx.font="20px Arial";
-  ctx.fillText("Score: "+score,10,30);
-  ctx.fillText("High Score: "+highScore,10,55);
-}
+function drawScore(){ ctx.fillStyle="black"; ctx.font="20px Arial"; ctx.fillText("Score: "+score,10,30); ctx.fillText("High Score: "+highScore,10,55); }
 
 function update(){
   frame++;
   player.y+=player.vy; player.vy+=player.gravity;
-
   if(player.y>300){ player.y=300; player.vy=0; player.grounded=true; player.jumpCount=0; }
 
   obstacles.forEach(obs=>{
@@ -390,7 +372,6 @@ function update(){
 
     const hitPlayer={ left:player.x+25,right:player.x+player.width-25,top:player.y+25,bottom:player.y+player.height-5 };
     const hitObs={ left:obs.x+10,right:obs.x+obs.width-10,top:obs.y+10,bottom:obs.y+obs.height };
-
     if(hitPlayer.right>hitObs.left && hitPlayer.left<hitObs.right && hitPlayer.bottom>hitObs.top+10){
       gameOver=true; showGameOverScreen(); if(isSoundOn()){ stopBGM(); gameOverSound.play(); }
       if(score>highScore){ highScore=score; localStorage.setItem("highScore",highScore); }
@@ -399,17 +380,14 @@ function update(){
 }
 
 function showGameOverScreen(){
+  if(animationId) cancelAnimationFrame(animationId); // 🆕 stop animasi pas game over
   overlay.style.display="flex";
-
-  // PC click
   document.getElementById("restartBtn").onclick=startGame;
   document.getElementById("backToMenuBtn").onclick=()=>{
     overlay.style.display="none";
     mainMenu.style.display="flex";
     canvas.style.display="none";
   };
-
-  // Touch for Android
   document.getElementById("restartBtn").addEventListener("touchstart",(e)=>{ e.preventDefault(); startGame(); });
   document.getElementById("backToMenuBtn").addEventListener("touchstart",(e)=>{ e.preventDefault(); overlay.style.display="none"; mainMenu.style.display="flex"; canvas.style.display="none"; });
 }
@@ -418,9 +396,8 @@ function animate(){
   if(gameOver) return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   update(); drawPlayer(); drawObstacles(); drawScore();
-  requestAnimationFrame(animate);
+  animationId=requestAnimationFrame(animate);
 }
 </script>
 </body>
 </html>
-
