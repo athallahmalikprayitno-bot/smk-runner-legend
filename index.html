@@ -371,7 +371,7 @@ function update(){
     if(obs.x+obs.width<0){ obs.x=800+Math.random()*250; score++; if(score%100===0) obs.speed+=1; }
 
     const hitPlayer={ left:player.x+10,right:player.x+player.width-10,top:player.y+10,bottom:player.y+player.height-10 };
-    const hitObs={ left:obs.x+6,right:obs.x+obs.width-6,top:obs.y+6,bottom:obs.y+obs.height };
+    const hitObs={ left:obs.x+3,right:obs.x+obs.width-3,top:obs.y+3,bottom:obs.y+obs.height };
     if(hitPlayer.right>hitObs.left && hitPlayer.left<hitObs.right && hitPlayer.bottom>hitObs.top+10){
       gameOver=true; showGameOverScreen(); if(isSoundOn()){ stopBGM(); gameOverSound.play(); }
       if(score>highScore){ highScore=score; localStorage.setItem("highScore",highScore); }
@@ -401,6 +401,7 @@ function animate(){
 </script>
 </body>
 </html> 
+
 
 
 
