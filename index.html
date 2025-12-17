@@ -370,7 +370,7 @@ function update(){
     obs.x-=obs.speed;
     if(obs.x+obs.width<0){ obs.x=800+Math.random()*250; score++; if(score%100===0) obs.speed+=1; }
 
-    const hitPlayer={ left:player.x+5,right:player.x+player.width-5,top:player.y+5,bottom:player.y+player.height-5 };
+    const hitPlayer={ left:player.x+3,right:player.x+player.width-3,top:player.y+3,bottom:player.y+player.height-3 };
     const hitObs={ left:obs.x+4,right:obs.x+obs.width-4,top:obs.y+4,bottom:obs.y+obs.height-4 };
     if(hitPlayer.right>hitObs.left && hitPlayer.left<hitObs.right && hitPlayer.bottom>hitObs.top+10){
       gameOver=true; showGameOverScreen(); if(isSoundOn()){ stopBGM(); gameOverSound.play(); }
@@ -401,5 +401,6 @@ function animate(){
 </script>
 </body>
 </html> 
+
 
 
