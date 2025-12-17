@@ -363,68 +363,21 @@ function drawScore(){ ctx.fillStyle="black"; ctx.font="20px Arial"; ctx.fillText
 
 function update(){
   frame++;
+  player.y+=player.vy; player.vy+=player.gravity;
+  if(player.y>300){ player.y=300; player.vy=0; player.grounded=true; player.jumpCount=0; }
 
-  /* ===== PLAYER PHYSICS ===== */
-  player.y += player.vy;
-  player.vy += player.gravity;
+  obstacles.forEach(obs=>{
+    obs.x-=obs.speed;
+    if(obs.x+obs.width<0){ obs.x=800+Math.random()*250; score++; if(score%100===0) obs.speed+=1; }
 
-  if (player.y >= 300) {
-    player.y = 300;
-    player.vy = 0;
-    player.grounded = true;
-    player.jumpCount = 0;
-  }
-
-  /* ===== OBSTACLE & COLLISION ===== */
-  obstacles.forEach(obs => {
-    obs.x -= obs.speed;
-
-    if (obs.x + obs.width < 0) {
-      obs.x = 800 + Math.random() * 250;
-      score++;
-
-      if (score % 100 === 0) obs.speed += 1;
-    }
-
-    /* === HITBOX FIX TOTAL === */
-    const padding = 8;
-
-    const hitPlayer = {
-      left: player.x + padding,
-      right: player.x + player.width - padding,
-      top: player.y + padding,
-      bottom: player.y + player.height - padding
-    };
-
-    const hitObs = {
-      left: obs.x,
-      right: obs.x + obs.width,
-      top: obs.y,
-      bottom: obs.y + obs.height
-    };
-
-    if (
-      hitPlayer.right > hitObs.left &&
-      hitPlayer.left < hitObs.right &&
-      hitPlayer.bottom > hitObs.top &&
-      hitPlayer.top < hitObs.bottom
-    ) {
-      gameOver = true;
-      showGameOverScreen();
-
-      if (isSoundOn()) {
-        stopBGM();
-        gameOverSound.play();
-      }
-
-      if (score > highScore) {
-        highScore = score;
-        localStorage.setItem("highScore", highScore);
-      }
+    const hitPlayer={ left:player.x+10,right:player.x+player.width-10,top:player.y+10,bottom:player.y+player.height-10 };
+    const hitObs={ left:obs.x+10,right:obs.x+obs.width-10,top:obs.y+10,bottom:obs.y+obs.height };
+    if(hitPlayer.right>hitObs.left && hitPlayer.left<hitObs.right && hitPlayer.bottom>hitObs.top+10){
+      gameOver=true; showGameOverScreen(); if(isSoundOn()){ stopBGM(); gameOverSound.play(); }
+      if(score>highScore){ highScore=score; localStorage.setItem("highScore",highScore); }
     }
   });
 }
-
 
 function showGameOverScreen(){
   if(animationId) cancelAnimationFrame(animationId); // 🆕 stop animasi pas game over
@@ -440,24 +393,12 @@ function showGameOverScreen(){
 }
 
 function animate(){
-  if (gameOver) return;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  update();
-  drawPlayer();
-  drawObstacles();
-  drawScore();
-
-  animationId = requestAnimationFrame(animate);
+  if(gameOver) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  update(); drawPlayer(); drawObstacles(); drawScore();
+  animationId=requestAnimationFrame(animate);
 }
-
 </script>
 </body>
 </html> 
-
-
-
-
-
-
 
