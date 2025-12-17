@@ -370,9 +370,9 @@ function update(){
     obs.x-=obs.speed;
     if(obs.x+obs.width<0){ obs.x=800+Math.random()*250; score++; if(score%100===0) obs.speed+=1; }
 
-    const hitPlayer={ left:player.x+10,right:player.x+player.width-10,top:player.y+10,bottom:player.y+player.height-10 };
+    const hitPlayer={ left:player.x+5,right:player.x+player.width-5,top:player.y+5,bottom:player.y+player.height-5 };
     const hitObs={ left:obs.x+5,right:obs.x+obs.width-5,top:obs.y+5,bottom:obs.y+obs.height-5 };
-    if(hitPlayer.right>hitObs.left && hitPlayer.left<hitObs.right && hitPlayer.bottom>hitObs.top+10){
+    if(hitPlayer.right>hitObs.left && hitPlayer.left<hitObs.right && hitPlayer.bottom>hitObs.top+5){
       gameOver=true; showGameOverScreen(); if(isSoundOn()){ stopBGM(); gameOverSound.play(); }
       if(score>highScore){ highScore=score; localStorage.setItem("highScore",highScore); }
     }
@@ -401,6 +401,7 @@ function animate(){
 </script>
 </body>
 </html> 
+
 
 
 
